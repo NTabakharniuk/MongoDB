@@ -1,0 +1,107 @@
+const { MongoClient } = require('mongodb');
+const zlib = require('node:zlib');
+const fs = require('fs');
+const readline = require('readline');
+const http =  require('http');
+const { join } = require('path');
+
+// or as an es module:
+// import { MongoClient } from 'mongodb'
+
+// Connection URL
+const url = 'mongodb+srv://NTabakharniukUKD:oOIZxkOcslNpdfIY@cluster0.0uubm97.mongodb.net/?retryWrites=true&w=majority';
+const urlFile = 'https://popwatch-staging.s3.us-east-2.amazonaws.com/movies_1.gz';
+
+
+const client = new MongoClient(url);
+
+// Database Name
+const dbName = 'myProject';
+
+async function main() {
+  // Use connect method to connect to the server
+  await client.connect();
+  console.log('Connected successfully to server');
+  const db = client.db(dbName);
+  const collection = db.collection('documents');
+
+  const insertResult = await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+  console.log('Inserted documents =>', insertResult);
+
+  return 'done.';
+}
+
+// запуск бази даних
+async function startDB() 
+{
+  await client.connect();
+  console.log('БД запущена'); 
+  const db = client.db(dbName);
+  const collection = db.collection('movies');
+}
+
+//вставлення в базу даних
+async function insert(file)
+{
+  const db = client.db(dbName);
+  const collection = db.collection('movies');
+  const insertResult = await collection.insertMany(file);
+  console.log('Вставлено фільми =>', insertResult);
+}
+
+//Парсення
+const arr = [] 
+async function parserRLine(rl){
+  for await (const line of rl) {
+  const jsonLine = JSON.parse(line)
+  arr.push(jsonLine)
+  }
+}
+
+//Скачує, витягує файл з архіва , перевіряє на наявність і записує  його в бд
+async function unzipAndWriteInMongoDB(startDB,parserRLine,checkaVailability) {
+  try {
+  //запуск БД
+  await startDB();
+
+  //скачує та витягує файл 
+  http.get(fileUrl,  (res) => {
+    const unzip = zlib.createGunzip();
+    const writeStream = fs.createWriteStream(fileName);
+    res.pipe(unzip).pipe(writeStream);
+
+  //Читати те, що дістали
+  readStream.on('finish', async () => {
+    const rl = readline.createInterface({
+      input: fs.createReadStream(fileName)
+    });
+  }
+    // Виклик парсеру
+    await parserRLine(rl)
+  
+//запуск
+unzipAndWriteInMongoDB(startDB,parserRLine,checkaVailability)
+
+//   const findResult = await collection.find({}).toArray();
+//   console.log('Found documents =>', findResult);
+
+//   const filteredDocs = await collection.find({ a: 3 }).toArray();
+//   console.log('Found documents filtered by { a: 3 } =>', filteredDocs);
+
+//   const updateResult = await collection.updateOne({ a: 3 }, { $set: { b: 1 } });
+//   console.log('Updated documents =>', updateResult);
+
+//   const deleteResult = await collection.deleteMany({ a: 3 });
+//   console.log('Deleted documents =>', deleteResult);
+
+//   const indexName = await collection.createIndex({ a: 1 });
+//   console.log('index name =', indexName);
+
+  // the following code examples can be pasted here...
+
+
+
+// main()
+//   .then(console.log)
+//   .catch(console.error)
+//   .finally(() => client.close());
